@@ -11,62 +11,128 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.widget.Toast
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.platform.LocalContext
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddNew_Activity(onSave: (String, String, String) -> Unit, onBack: () -> Unit) {
+fun AddNew_Activity(
+    onSave: (String, String, String) -> Unit,
+    onBack: () -> Unit
+) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
+
     val context = LocalContext.current
+
     val isEmailError = email.contains(" ")
     val isPhoneError = phone.contains(Regex("[a-zA-Z]"))
-    Column(modifier = Modifier.fillMaxSize().padding(30.dp)) {
-        Text(
-            "THÊM KHÁCH HÀNG MỚI",
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
-        )
 
-        OutlinedTextField(
-            value = name, onValueChange = { name = it },
-            label = { Text("Nhập tên khách hàng") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Nhập email") }, modifier = Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Nhập số điện thoại") }, modifier = Modifier.fillMaxWidth())
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                if (name.isBlank() || email.isBlank() || phone.isBlank()) {
-                    Toast.makeText(context, "Vui lòng nhập đầy đủ thông tin!", Toast.LENGTH_SHORT).show()
-                } else if (isEmailError) {
-                    Toast.makeText(context, "Email không được để trống!", Toast.LENGTH_SHORT).show()
-                } else if (isPhoneError){
-                    Toast.makeText(context, "SDT phải là số từ 0 -> 9!", Toast.LENGTH_SHORT).show()
-                }else {
-                    onSave(name, email, phone)
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Thêm khách hàng",
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
                 }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-        ) {
-            Text("LƯU THÔNG TIN", color = Color.White)
+            )
         }
+    ) { padding ->
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text("QUAY LẠI", color = Color.White)
+
+            Text(
+                "Nhập thông tin",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // NAME
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Tên khách hàng") },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // EMAIL
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                isError = isEmailError,
+                supportingText = {
+                    if (isEmailError) Text("Email không hợp lệ")
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // PHONE
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                label = { Text("Số điện thoại") },
+                isError = isPhoneError,
+                supportingText = {
+                    if (isPhoneError) Text("Chỉ được nhập số")
+                },
+                singleLine = true,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // SAVE BUTTON
+            Button(
+                onClick = {
+                    when {
+                        name.isBlank() || email.isBlank() || phone.isBlank() -> {
+                            Toast.makeText(context, "Nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show()
+                        }
+                        isEmailError -> {
+                            Toast.makeText(context, "Email không hợp lệ", Toast.LENGTH_SHORT).show()
+                        }
+                        isPhoneError -> {
+                            Toast.makeText(context, "SĐT phải là số", Toast.LENGTH_SHORT).show()
+                        }
+                        else -> {
+                            onSave(name, email, phone)
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text("Lưu", fontSize = 16.sp)
+            }
         }
     }
 }

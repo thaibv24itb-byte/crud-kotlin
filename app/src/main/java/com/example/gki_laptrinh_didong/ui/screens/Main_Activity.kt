@@ -3,6 +3,7 @@ package com.example.gki_laptrinh_didong.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -16,49 +17,112 @@ import com.example.gki_laptrinh_didong.viewmodel.CustomerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Main_Activity(viewModel: CustomerViewModel, onAddClick: () -> Unit, onEditClick: (com.example.gki_laptrinh_didong.model.Customer) -> Unit) {
-    // Lắng nghe danh sách khách hàng từ ViewModel
+fun Main_Activity(
+    viewModel: CustomerViewModel,
+    onAddClick: () -> Unit,
+    onEditClick: (com.example.gki_laptrinh_didong.model.Customer) -> Unit
+) {
     val customers by viewModel.customers.collectAsState()
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
-                    Text(
-                        text = "Hiển thị danh sách",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        color = Color.Black
-                    )
+                    Column {
+                        Text(
+                            "Customers",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 20.sp
+                        )
+                        Text(
+                            "${customers.size} khách hàng",
+                            fontSize = 13.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
-                windowInsets = WindowInsets(0),
-                modifier = Modifier.padding(top = 30.dp),
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White,
-                    titleContentColor = Color.Black
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-        bottomBar = {
-            Button(
+
+        floatingActionButton = {
+            FloatingActionButton(
                 onClick = onAddClick,
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Text("Add")
+                Text("+", fontSize = 20.sp)
             }
         }
+
     ) { padding ->
-        // Nếu danh sách trống, hiện thông báo tải dữ liệu
+
         if (customers.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                Text("Đang tải dữ liệu hoặc danh sách trống...")
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = androidx.compose.ui.Alignment.Center
+            ) {
+                Text(
+                    "Chưa có khách hàng",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         } else {
-            // Hiện danh sách thật
-            LazyColumn(modifier = Modifier.padding(padding)) {
+
+            LazyColumn(
+                modifier = Modifier
+                    .padding(padding),
+                contentPadding = PaddingValues(12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+
                 items(customers) { customer ->
-                    CustomerItem(customer = customer, onClick = { onEditClick(customer) })
+
+                    ElevatedCard(
+                        onClick = { onEditClick(customer) },
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.elevatedCardElevation(4.dp),
+                        colors = CardDefaults.elevatedCardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Column {
+                                Text(
+                                    text = customer.name,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+
+                                Spacer(modifier = Modifier.height(4.dp))
+
+                                Text(
+                                    text = customer.phone_number,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+
+                            Text(
+                                text = "Edit",
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
                 }
             }
         }
